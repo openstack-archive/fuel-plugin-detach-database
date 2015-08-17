@@ -19,7 +19,7 @@
   required_for: [deploy_end]
   tasks: [fuel_pkgs, hiera, globals, tools, logging, netconfig,
     hosts, firewall, deploy_start, cluster, database-virtual-ip, cluster-haproxy,
-    task-database]
+    openstack-haproxy-stats, task-database]
   parameters:
     strategy:
       type: parallel
