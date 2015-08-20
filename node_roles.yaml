@@ -11,3 +11,4 @@ standalone-database:
     min: 1
   update_required:
     - standalone-database
+    - controller
