@@ -42,7 +42,7 @@
   required_for: [deploy_end]
   requires: [cluster]
   parameters:
-    puppet_manifest: "virtual_ip.pp"
+    puppet_manifest: "/etc/puppet/modules/osnailyfacter/modular/virtual_ips/virtual_ips.pp"
     puppet_modules: "/etc/puppet/modules"
     timeout: 3600
 
