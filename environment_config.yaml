@@ -12,4 +12,7 @@ attributes:
       #remote_db_password: 'secret'
       custom_mysql_setup_class: 'galera'
     label: "Additional config"
-    description: "Just put here valid yaml" 
+    description: "Just put here valid yaml"
+    regex:
+      source: '.+'
+      error: "This field should not be empty" 
