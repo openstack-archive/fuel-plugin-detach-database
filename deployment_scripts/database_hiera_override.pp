@@ -115,10 +115,21 @@ deploy_vrouter: <%= @deploy_vrouter %>
     ensure  => 'installed',
   }
 
-  file_line {"${plugin_name}_hiera_override":
-    path  => '/etc/hiera.yaml',
-    line  => "  - override/${plugin_name}",
-    after => '  - override/module/%{calling_module}',
+  # hiera file changes between 7.0 and 8.0 so we need to handle the override the
+  # different yaml formats via these exec hacks.  It should be noted that the
+  # fuel hiera task will wipe out these this update to the hiera.yaml
+  exec { "${plugin_name}_hiera_override_7.0":
+    command => "sed '/  - override\/plugins/a\  - override\/${plugin_name}' /etc/hiera.yaml",
+    path    => '/bin:/usr/bin',
+    unless  => "grep -q '^  - override/${plugin_name}' /etc/hiera.yaml",
+    onlyif  => 'grep -q "^  - override/plugins" /etc/hiera.yaml'
+  }
+
+  exec { "${plugin_name}_hiera_override_8.0":
+    command => "sed '/    - override\/plugins/a\    - override\/${plugin_name}' /etc/hiera.yaml",
+    path    => '/bin:/usr/bin',
+    unless  => "grep -q '^    - override/${plugin_name}' /etc/hiera.yaml",
+    onlyif  => 'grep -q "^    - override/plugins" /etc/hiera.yaml'
   }
 
 }
