@@ -6,8 +6,8 @@
   requires: [deploy_start]
   required_for: [deploy_end, primary-controller, controller]
   tasks: [fuel_pkgs, hiera, globals, tools, logging, netconfig,
-    hosts, firewall, deploy_start, cluster, database-virtual-ip, cluster-haproxy,
-    openstack-haproxy-stats, task-database]
+    hosts, firewall, database-firewall, deploy_start, cluster, 
+    database-virtual-ip, cluster-haproxy, openstack-haproxy-stats, task-database]
   parameters:
     strategy:
       type: one_by_one
@@ -18,8 +18,8 @@
   requires: [deploy_start, primary-standalone-database, primary-controller, controller]
   required_for: [deploy_end]
   tasks: [fuel_pkgs, hiera, globals, tools, logging, netconfig,
-    hosts, firewall, deploy_start, cluster, database-virtual-ip, cluster-haproxy,
-    openstack-haproxy-stats, task-database]
+    hosts, firewall, database-firewall, deploy_start, cluster,
+    database-virtual-ip, cluster-haproxy, openstack-haproxy-stats, task-database]
   parameters:
     strategy:
       type: parallel
@@ -40,7 +40,7 @@
   type: puppet
   groups: [primary-standalone-database, standalone-database]
   required_for: [deploy_end]
-  requires: [cluster]
+  requires: [database-firewall, cluster]
   parameters:
     puppet_manifest: "/etc/puppet/modules/osnailyfacter/modular/virtual_ips/virtual_ips.pp"
     puppet_modules: "/etc/puppet/modules"
@@ -49,8 +49,8 @@
 - id: task-database
   type: puppet
   role: [primary-standalone-database, standalone-database]
-  requires: [hosts, firewall]
-  requires: [database-haproxy, database-virtual-ip]
+  requires: [hosts, database-firewall, cluster, database-haproxy,
+    database-virtual-ip]
   parameters:
     puppet_manifest: /etc/puppet/modules/osnailyfacter/modular/database/database.pp
     puppet_modules: /etc/puppet/modules
@@ -69,6 +69,16 @@
   required_for: [logging]
   parameters:
     puppet_manifest: "database_hiera_override.pp"
+    puppet_modules: "/etc/puppet/modules"
+    timeout: 120
+
+- id: database-firewall
+  type: puppet
+  role: [primary-standalone-database, standalone-database]
+  requires: [globals, firewall]
+  required_for: [cluster, task-database]
+  parameters:
+    puppet_manifest: "database_firewall.pp"
     puppet_modules: "/etc/puppet/modules"
     timeout: 120
 
