@@ -1,8 +1,7 @@
 attributes:
   metadata:
-    label: "Database settings"
+    label: "Detach Database Plugin"
     weight: 90
-  # Gathering variables from user about our DCP
   yaml_additional_config:
     type: "textarea"
     weight: 52
@@ -12,7 +11,7 @@ attributes:
       #remote_db_password: 'secret'
       custom_mysql_setup_class: 'galera'
     label: "Additional config"
-    description: "Just put here valid yaml"
+    description: "Input must be valid YAML"
     regex:
       source: '.+'
       error: "This field should not be empty"
