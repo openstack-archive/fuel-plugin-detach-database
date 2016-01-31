@@ -5,7 +5,7 @@
   role: [primary-standalone-database]
   requires: [deploy_start]
   required_for: [deploy_end, primary-controller, controller]
-  tasks: [hiera, setup_repositories, fuel_pkgs, globals, tools, logging, netconfig,
+  tasks: [hiera, fuel_pkgs, globals, tools, logging, netconfig,
     hosts, firewall, database-firewall, deploy_start, cluster,
     database-virtual-ip, cluster-haproxy, openstack-haproxy-stats, task-database]
   parameters:
@@ -17,7 +17,7 @@
   role: [standalone-database]
   requires: [deploy_start, primary-standalone-database, primary-controller, controller]
   required_for: [deploy_end]
-  tasks: [hiera, setup_repositories, fuel_pkgs, globals, tools, logging, netconfig,
+  tasks: [hiera, fuel_pkgs, globals, tools, logging, netconfig,
     hosts, firewall, database-firewall, deploy_start, cluster,
     database-virtual-ip, cluster-haproxy, openstack-haproxy-stats, task-database]
   parameters:
