@@ -1,7 +1,7 @@
 notice('MODULAR: detach-database/database_hiera_override.pp')
 
 $detach_database_plugin = hiera('detach-database', undef)
-$hiera_dir = '/etc/hiera/override'
+$hiera_dir = '/etc/hiera/plugins'
 $plugin_name = 'detach-database'
 $plugin_yaml = "${plugin_name}.yaml"
 
@@ -114,22 +114,4 @@ deploy_vrouter: <%= @deploy_vrouter %>
   package {'ruby-deep-merge':
     ensure  => 'installed',
   }
-
-  # hiera file changes between 7.0 and 8.0 so we need to handle the override the
-  # different yaml formats via these exec hacks.  It should be noted that the
-  # fuel hiera task will wipe out these this update to the hiera.yaml
-  exec { "${plugin_name}_hiera_override_7.0":
-    command => "sed -i '/  - override\\/plugins/a\\  - override\\/${plugin_name}' /etc/hiera.yaml",
-    path    => '/bin:/usr/bin',
-    unless  => "grep -q '^  - override/${plugin_name}' /etc/hiera.yaml",
-    onlyif  => 'grep -q "^  - override/plugins" /etc/hiera.yaml'
-  }
-
-  exec { "${plugin_name}_hiera_override_8.0":
-    command => "sed -i '/    - override\\/plugins/a\\    - override\\/${plugin_name}' /etc/hiera.yaml",
-    path    => '/bin:/usr/bin',
-    unless  => "grep -q '^    - override/${plugin_name}' /etc/hiera.yaml",
-    onlyif  => 'grep -q "^    - override/plugins" /etc/hiera.yaml'
-  }
-
 }
