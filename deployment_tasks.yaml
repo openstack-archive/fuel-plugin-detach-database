@@ -27,6 +27,7 @@
 # Deployment tasks
 - id: database-haproxy
   type: puppet
+  version: 2.0.0
   groups: [primary-standalone-database, standalone-database]
   required_for: [task-database, deploy_end]
   requires: [deploy_start, database-virtual-ip, cluster-haproxy,
@@ -38,6 +39,7 @@
 
 - id: database-virtual-ip
   type: puppet
+  version: 2.0.0
   groups: [primary-standalone-database, standalone-database]
   required_for: [deploy_end]
   requires: [database-firewall, cluster]
@@ -48,7 +50,8 @@
 
 - id: task-database
   type: puppet
-  role: [primary-standalone-database, standalone-database]
+  version: 2.0.0
+  groups: [primary-standalone-database, standalone-database]
   requires: [hosts, database-firewall, cluster, database-haproxy,
     database-virtual-ip]
   parameters:
@@ -62,6 +65,7 @@
 
 - id: database-hiera-override
   type: puppet
+  version: 2.0.0
   groups: [primary-controller, controller, primary-standalone-database,
     standalone-database, cinder, cinder-vmware, compute, ceph-osd,
     primary-mongo, mongo]
@@ -74,6 +78,7 @@
 
 - id: database-firewall
   type: puppet
+  version: 2.0.0
   role: [primary-standalone-database, standalone-database]
   requires: [globals, firewall]
   required_for: [cluster, task-database]
