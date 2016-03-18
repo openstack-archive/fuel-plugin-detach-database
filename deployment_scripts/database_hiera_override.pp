@@ -47,13 +47,13 @@ if $detach_database_plugin {
     }
   }
 
-  #TODO(mattymo): debug needing corosync_roles
   case hiera('role', 'none') {
     /database/: {
       $corosync_roles = $database_roles
       $deploy_vrouter = false
       $mysql_enabled = true
       $corosync_nodes = $database_nodes
+      $haproxy_colocate = false
     }
     /controller/: {
       $mysql_enabled = false
@@ -98,6 +98,9 @@ corosync_roles:
 @corosync_roles.each do |crole|
 %>  - <%= crole %>
 <% end -%>
+<% end -%>
+<% if @haproxy_colocate -%>
+haproxy_colocate: <%= @haproxy_colocate %>
 <% end -%>
 deploy_vrouter: <%= @deploy_vrouter %>
 ')
