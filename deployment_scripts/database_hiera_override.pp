@@ -32,8 +32,9 @@ if $detach_database_plugin {
   $database_nodes_names = keys($database_address_map)
 
   ###################
-  case hiera('role', 'none') {
-    'primary-standalone-database': {
+  $roles = join(hiera('roles'), ',')
+  case $roles {
+    /primary-standalone-database/: {
       $primary_database = true
       $primary_controller = true
     }
@@ -46,19 +47,16 @@ if $detach_database_plugin {
       $primary_controller = false
     }
   }
-
-  case hiera('role', 'none') {
-    /database/: {
+  case $roles {
+    /standalone-database/: {
       $corosync_roles = $database_roles
       $deploy_vrouter = false
       $mysql_enabled = true
       $corosync_nodes = $database_nodes
       $colocate_haproxy = 'false'
     }
-    /controller/: {
-      $mysql_enabled = false
-    }
     default: {
+      $mysql_enabled = false
     }
   }
   ###################
@@ -118,3 +116,4 @@ deploy_vrouter: <%= @deploy_vrouter %>
     ensure  => 'installed',
   }
 }
+

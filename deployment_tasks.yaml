@@ -4,10 +4,11 @@
   type: group
   role: [primary-standalone-database]
   requires: [deploy_start]
-  required_for: [deploy_end, primary-controller, controller]
+  required_for: [deploy_end]
   tasks: [hiera, fuel_pkgs, globals, tools, logging, netconfig,
-    hosts, firewall, database-firewall, deploy_start, cluster,
-    database-virtual-ip, cluster-haproxy, openstack-haproxy-stats, task-database]
+    hosts, firewall, database-firewall, deploy_start, primary-cluster,
+    database-virtual-ip, primary-cluster-haproxy, openstack-haproxy-stats,
+    primary-database]
   parameters:
     strategy:
       type: one_by_one
@@ -19,56 +20,16 @@
   required_for: [deploy_end]
   tasks: [hiera, fuel_pkgs, globals, tools, logging, netconfig,
     hosts, firewall, database-firewall, deploy_start, cluster,
-    database-virtual-ip, cluster-haproxy, openstack-haproxy-stats, task-database]
+    database-virtual-ip, cluster-haproxy, openstack-haproxy-stats, database]
   parameters:
     strategy:
       type: parallel
 
 # Deployment tasks
-- id: database-haproxy
-  type: puppet
-  version: 2.0.0
-  groups: [primary-standalone-database, standalone-database]
-  required_for: [task-database, deploy_end]
-  requires: [deploy_start, database-virtual-ip, cluster-haproxy,
-    openstack-haproxy-stats]
-  parameters:
-    puppet_manifest: "database-haproxy.pp"
-    puppet_modules: "/etc/puppet/modules"
-    timeout: 3600
-
-- id: database-virtual-ip
-  type: puppet
-  version: 2.0.0
-  groups: [primary-standalone-database, standalone-database]
-  required_for: [deploy_end]
-  requires: [database-firewall, cluster]
-  parameters:
-    puppet_manifest: "/etc/puppet/modules/osnailyfacter/modular/virtual_ips/virtual_ips.pp"
-    puppet_modules: "/etc/puppet/modules"
-    timeout: 3600
-
-- id: task-database
-  type: puppet
-  version: 2.0.0
-  groups: [primary-standalone-database, standalone-database]
-  requires: [hosts, database-firewall, cluster, database-haproxy,
-    database-virtual-ip]
-  parameters:
-    puppet_manifest: /etc/puppet/modules/osnailyfacter/modular/database/database.pp
-    puppet_modules: /etc/puppet/modules
-    timeout: 3600
-  test_pre:
-    cmd: ruby /etc/puppet/modules/osnailyfacter/modular/database/database_pre.rb
-  test_post:
-    cmd: ruby /etc/puppet/modules/osnailyfacter/modular/database/database_post.rb
-
 - id: database-hiera-override
   type: puppet
   version: 2.0.0
-  groups: [primary-controller, controller, primary-standalone-database,
-    standalone-database, cinder, cinder-vmware, compute, ceph-osd,
-    primary-mongo, mongo]
+  role: '*'
   requires: [globals]
   required_for: [logging]
   parameters:
@@ -81,9 +42,32 @@
   version: 2.0.0
   role: [primary-standalone-database, standalone-database]
   requires: [globals, firewall]
-  required_for: [cluster, task-database]
+  required_for: [primary-cluster, cluster, primary-database, database]
   parameters:
     puppet_manifest: "database_firewall.pp"
     puppet_modules: "/etc/puppet/modules"
     timeout: 120
 
+
+- id: database-haproxy
+  type: puppet
+  version: 2.0.0
+  role: [primary-standalone-database, standalone-database]
+  required_for: [primary-database, database, deploy_end]
+  requires: [deploy_start, database-virtual-ip, primary-cluster-haproxy,
+    cluster-haproxy, openstack-haproxy-stats]
+  parameters:
+    puppet_manifest: "database-haproxy.pp"
+    puppet_modules: "/etc/puppet/modules"
+    timeout: 3600
+
+- id: database-virtual-ip
+  type: puppet
+  version: 2.0.0
+  role: [primary-standalone-database, standalone-database]
+  required_for: [primary-database, database, deploy_end]
+  requires: [database-firewall, primary-cluster, cluster]
+  parameters:
+    puppet_manifest: "/etc/puppet/modules/osnailyfacter/modular/virtual_ips/virtual_ips.pp"
+    puppet_modules: "/etc/puppet/modules"
+    timeout: 3600
