@@ -11,18 +11,11 @@ if $detach_database_plugin {
     fail('Database VIP is not defined')
   }
   $yaml_additional_config = pick($detach_database_plugin['yaml_additional_config'], {})
-  #TODO (holser): Redesign parseyaml and is_bool once [MODULES-2462] applied
-  $settings_hash       = parseyaml($detach_database_plugin['yaml_additional_config'])
+  $settings_hash       = parseyaml($detach_database_plugin['yaml_additional_config'], {})
 
-  if is_bool($settings_hash) {
-    $settings_hash_real = {}
-  } else {
-    $settings_hash_real = $settings_hash
-  }
-
-  $nodes_hash = hiera('nodes')
+  $nodes_hash = $network_metadata['nodes']
   $management_vip = hiera('management_vip')
-  $database_vip = pick($settings_hash_real['remote_database'],$network_metadata['vips']['database']['ipaddr'])
+  $database_vip = pick($settings_hash['remote_database'],$network_metadata['vips']['database']['ipaddr'])
 
   #Set database_nodes values
   $database_roles = [ 'primary-standalone-database', 'standalone-database' ]
