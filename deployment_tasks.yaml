@@ -3,9 +3,7 @@
 - id: primary-standalone-database
   type: group
   role: [primary-standalone-database]
-  requires: [deploy_start]
-  required_for: [deploy_end]
-  tasks: [hiera, fuel_pkgs, globals, tools, logging, netconfig,
+  tasks: [pre_hiera_config, hiera, fuel_pkgs, globals, tools, logging, netconfig,
     hosts, firewall, database-firewall, deploy_start, primary-cluster,
     database-virtual-ip, primary-cluster-haproxy, openstack-haproxy-stats,
     primary-database]
@@ -16,9 +14,7 @@
 - id: standalone-database
   type: group
   role: [standalone-database]
-  requires: [deploy_start, primary-standalone-database, primary-controller, controller]
-  required_for: [deploy_end]
-  tasks: [hiera, fuel_pkgs, globals, tools, logging, netconfig,
+  tasks: [pre_hiera_config, hiera, fuel_pkgs, globals, tools, logging, netconfig,
     hosts, firewall, database-firewall, deploy_start, cluster,
     database-virtual-ip, cluster-haproxy, openstack-haproxy-stats, database]
   parameters:
@@ -30,8 +26,8 @@
   type: puppet
   version: 2.0.0
   role: ['/.*/']
-  requires: [globals]
-  required_for: [logging]
+  requires: [pre_hiera_config]
+  required_for: [pre_deployment_end]
   parameters:
     puppet_manifest: "database_hiera_override.pp"
     puppet_modules: "/etc/puppet/modules"
@@ -71,3 +67,4 @@
     puppet_manifest: "/etc/puppet/modules/osnailyfacter/modular/virtual_ips/virtual_ips.pp"
     puppet_modules: "/etc/puppet/modules"
     timeout: 3600
+
